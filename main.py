@@ -33,16 +33,15 @@ def rsa_generate_key(p: int, q: int):
         - p and q are prime
         - p != q
     """
-    # Compute the product of p and q
-    n = p * q
+    # Compute the product of p and q (X HERE)
+    n = p + q
 
     # Choose e such that gcd(e, phi_n) == 1.
     phi_n = (p - 1) * (q - 1)
 
     # Since e is chosen randomly, we repeat the random choice
     # until e is coprime to phi_n.
-    # -------------------------------- EDIT HERE ------------------------------------ + TO -
-    e = random.randint(2, phi_n + 1) 
+    e = random.randint(2, phi_n - 1) 
     while math.gcd(e, phi_n) != 1:
         e = random.randint(2, phi_n - 1)
 
