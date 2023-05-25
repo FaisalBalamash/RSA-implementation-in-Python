@@ -9,18 +9,18 @@ permissions:
 
 jobs:
   build:
-    name: Autograding
+    name: Checking program
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: education/autograding@v1
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
               python-version: '3.11'
               cache: 'pip'
+        name: Adding dependences from requirement file
       - run: pip install -r requirements.txt
       - run: pip test
 
       - name: Run Python unit tests
-        run: python3 -u -m unittest tests/maintest.py
+        run: python3 -u -m unittest maintest.py
