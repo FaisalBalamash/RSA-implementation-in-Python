@@ -41,7 +41,8 @@ def rsa_generate_key(p: int, q: int):
 
     # Since e is chosen randomly, we repeat the random choice
     # until e is coprime to phi_n.
-    e = random.randint(2, phi_n - 1)
+    # -------------------------------- EDIT HERE ------------------------------------ + TO -
+    e = random.randint(2, phi_n + 1) 
     while math.gcd(e, phi_n) != 1:
         e = random.randint(2, phi_n - 1)
 
