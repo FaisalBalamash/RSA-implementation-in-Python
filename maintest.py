@@ -1,5 +1,8 @@
 import unittest
 import main
+import math
+import random
+import sympy
 
 class TestRSA(unittest.TestCase):
     def test_RSA(self):
