@@ -45,7 +45,7 @@ def modular_inverse(e, phi_n):
         exit(1)
 
     else:
-        # m is added to handle negative x
+        # phi_n is added to handle negative x
         res = (x % phi_n + phi_n) % phi_n
         return res
 
