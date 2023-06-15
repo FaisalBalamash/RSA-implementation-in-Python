@@ -6,7 +6,6 @@ import sympy
 import tkinter as tk
 from tkinter import filedialog
 
-
 def getprimes():
     while True:
         # Prompt the user to enter the minimum and maximum values
@@ -94,6 +93,7 @@ def rsa_generate_key(p: int, q: int):
     d = modular_inverse(e, phi_n)
 
     return ((p, q, d), (n, e))
+
 
 def rsa_encrypt():
     print("select public key file")
@@ -186,12 +186,11 @@ def rsa_decrypt():
     print("Select private key file:")
     selected_private_key_file = select_file()
     private_key = read_private_key(selected_private_key_file)
-
+    p, q, d = private_key
     print("Select ciphertext to decrypt:")
     selected_ciphertext_file = select_file()
-    
+
     while True:
-        p, q, d = private_key
 
         # Check if the private key is valid
         if isinstance(p, int) and isinstance(q, int) and isinstance(d, int) and p > 0 and q > 0 and d > 0:
@@ -202,14 +201,47 @@ def rsa_decrypt():
             selected_private_key_file = select_file()
             private_key = read_private_key(selected_private_key_file)
 
-    #int list
-    ciphertext = read_ciphertext(selected_ciphertext_file)
-    print(ciphertext)
+    # Obtain n from publickey.txt
+    with open("publickey.txt", "r") as file:
+        contents = file.readline()
+        n, e = map(int, contents.strip('()\n').split(','))
 
+    # int list
+    ciphertext_values = read_ciphertext(selected_ciphertext_file)
+    print(ciphertext_values)
+
+    decrypted_values = []
+
+    # applying rsa decrypt equation
+    for value in ciphertext_values:
+        decrypted_value = (value ** d) % n
+        decrypted_values.append(decrypted_value)
+
+    convert_to_text(decrypted_values)
  
-    
 
+def convert_to_text(decrypted_values):
+    text = ""
 
+    for value in decrypted_values:
+        # Convert the 4-digit value to a string
+        value_str = str(value)
+
+        # Divide the value into two numbers made of two digits
+        num1 = int(value_str[:2])
+        num2 = int(value_str[2:])
+
+        # Convert each pair of digits to ASCII characters and concatenate to the resulting text
+        letter1 = chr(num1)
+        letter2 = chr(num2)
+        text += letter1 + letter2
+
+    print(text)
+    write_plaintext_to_file(text)
+
+def write_plaintext_to_file(plaintext):
+    with open("plaintext.txt", "w") as file:
+        file.write(plaintext)
 
 
 def read_private_key(selected_private_key_file: str):
