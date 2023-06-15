@@ -1,5 +1,6 @@
 import math
 import random
+from typing import Tuple
 import sympy
 
 
@@ -39,7 +40,7 @@ def extended_gcd(a, b):
 def modular_inverse(e, phi_n):
     g = extended_gcd(e, phi_n)
 
-    #if gcd = 1 doesn't exist then we can't inverse it.
+    # if gcd = 1 doesn't exist then we can't inverse it.
     if (g != 1):
         print("Inverse doesn't exist")
         exit(1)
@@ -69,7 +70,7 @@ def rsa_generate_key(p: int, q: int):
 
     # Since e is chosen randomly, we repeat the random choice
     # until e is coprime to phi_n.
-    e = random.randint(2, phi_n - 1) 
+    e = random.randint(2, phi_n - 1)
     while math.gcd(e, phi_n) != 1:
         e = random.randint(2, phi_n - 1)
 
@@ -78,6 +79,49 @@ def rsa_generate_key(p: int, q: int):
     d = modular_inverse(e, phi_n)
 
     return ((p, q, d), (n, e))
+
+
+def rsa_encrypt(public_key: Tuple[int, int], plaintext: int) -> int:
+    """Encrypt the given plaintext using the recipient's public key.
+
+    Preconditions:
+        - public_key is a valid RSA public key (n, e)
+        - 0 < plaintext < public_key[0]
+    """
+    n, e = public_key
+
+    encrypted = (plaintext ** e) % n
+
+    return encrypted
+
+
+def rsa_decrypt(private_key: Tuple[int, int, int], ciphertext: int) -> int:
+    """Decrypt the given ciphertext using the recipient's private key.
+
+    Preconditions:
+        - private_key is a valid RSA private key (p, q, d)
+        - 0 < ciphertext < private_key[0] * private_key[1]
+    """
+    p, q, d = private_key
+    n = p * q
+
+    decrypted = (ciphertext ** d) % n
+
+    return decrypted
+
+
+def read_public_key():
+    with open("publickey.txt", "r") as r:
+        contents = r.readline()
+        n, e = map(int, contents.strip('()\n').split(','))
+        return int(n), int(e)
+
+
+def read_private_key():
+    with open("privatekey.txt", "r") as r:
+        contents = r.readline()
+        p, q, d = map(int, contents.strip('()\n').split(','))
+        return int(p), int(q), int(d)
 
 
 if __name__ == "__main__":
@@ -96,3 +140,10 @@ if __name__ == "__main__":
         f.write(f'{rsa_generate_key(p, q)[1]}\n')
 
 print("Key pair generated!")
+
+print("Encrypting process: ")
+ciphertext = rsa_encrypt(read_public_key(), 100)
+print(ciphertext)
+
+print("Decrypting process: ")
+print(rsa_decrypt(read_private_key(), ciphertext))
