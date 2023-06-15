@@ -1,6 +1,7 @@
 import math
 import random
 from typing import Tuple
+from typing import List
 import sympy
 import tkinter as tk
 from tkinter import filedialog
@@ -9,11 +10,11 @@ from tkinter import filedialog
 def getprimes():
     while True:
         # 1st precondition: p and q are prime between 100 and 200
-        p = sympy.randprime(100, 200)
-        q = sympy.randprime(100, 200)
+        p = sympy.randprime(1, 999999999999)
+        q = sympy.randprime(1, 999999999999)
         # 2nd precondition: p != q
         if (p == q):
-            q = sympy.randprime(100, 200)
+            q = sympy.randprime(1, 999999999999)
         return p, q
 
 
@@ -82,27 +83,82 @@ def rsa_generate_key(p: int, q: int):
 
     return ((p, q, d), (n, e))
 
-
-def rsa_encrypt(public_key: Tuple[int, int], plaintext: int) -> int:
-    """Encrypt the given plaintext using the recipient's public key.
-
-    Preconditions:
-        - public_key is a valid RSA public key (n, e)
-        - 0 < plaintext < public_key[0]
-    """
-    # Prompt the user to select a public key file
-    print("Select a public key file:")
+def rsa_encrypt():
+    print("select public key file")
     selected_public_key_file = select_file()
-    
-    # Prompt the user to select a plaintext file
-    print("Select a plaintext file:")
+    public_key = read_public_key(selected_public_key_file)
+    n, e = public_key
+
+    print("select plaintext to encrypt")
     selected_plaintext_file = select_file()
-
-    # Add your encryption code here
-
-    return encrypted
+    plaintext = read_plaintext(selected_plaintext_file)
 
 
+
+    while True:
+        # Check if the public key is valid
+        if isinstance(n, int) and isinstance(e, int) and n > 0 and e > 0:
+            break
+        else:
+            print("Invalid public key. Please select a valid public key file.")
+            print("Select a public key file:")
+            selected_public_key_file = select_file()
+            public_key = read_public_key(selected_public_key_file)
+
+    # Convert the plaintext file to decimal ASCII values
+    decimal_values = convert_to_decimal(plaintext, n)
+
+    # Encrypt the decimal values using RSA encryption
+    encrypted_values = []
+    num_values = len(decimal_values)
+
+    # Process chunks of four decimal values
+    for i in range(0, num_values - (num_values % 4), 4):
+        values_chunk = decimal_values[i:i+4]  # Get the next four decimal values
+        encrypted_chunk = [pow(value, e, n) for value in values_chunk]  # Encrypt the chunk
+        encrypted_values.extend(encrypted_chunk)  # Append the encrypted chunk to the result
+
+    # Process remaining decimal values if any
+    if num_values % 4 != 0:
+        remaining_chunk = decimal_values[num_values - (num_values % 4):]  # Get the remaining decimal values
+        encrypted_chunk = [pow(value, e, n) for value in remaining_chunk]  # Encrypt the chunk
+        encrypted_values.extend(encrypted_chunk)  # Append the encrypted chunk to the result
+
+    # Save the encrypted values to the ciphertext file
+    with open('ciphertext.txt', 'w') as file:
+        file.write(' '.join(map(str, encrypted_values)))
+
+    return encrypted_values
+
+def read_plaintext(file_path: str) -> str:
+    """Read the content of the plaintext file and return it as a string."""
+    with open(file_path, 'r') as file:
+        plaintext = file.read()
+    return plaintext
+
+def convert_to_decimal(text: str, n: int) -> List[int]:
+    """Convert the characters in the text to concatenated decimal ASCII values within range (0, n)."""
+    decimal_values = []
+    length = len(text)
+
+    # Convert every two letters to concatenated decimal ASCII values
+    for i in range(0, length, 2):
+        if i + 1 < length:
+            concatenated_decimal = int(str(ord(text[i])) + str(ord(text[i + 1])))
+            if 0 < concatenated_decimal < n:
+                decimal_values.append(concatenated_decimal)
+        else:
+            # Handle odd number of characters
+            decimal_value = ord(text[i])
+            if 0 < decimal_value < n:
+                decimal_values.append(decimal_value)
+
+    return decimal_values
+
+
+
+
+##################### Decryption ########################
 def rsa_decrypt(private_key: Tuple[int, int, int], ciphertext: int) -> int:
     """Decrypt the given ciphertext using the recipient's private key.
 
@@ -110,24 +166,36 @@ def rsa_decrypt(private_key: Tuple[int, int, int], ciphertext: int) -> int:
         - private_key is a valid RSA private key (p, q, d)
         - 0 < ciphertext < private_key[0] * private_key[1]
     """
-    # Prompt the user to select a private key file
-    print("Select a private key file:")
-    selected_private_key_file = select_file()
-    
-    # Prompt the user to select a ciphertext file
-    print("Select a ciphertext file:")
-    selected_ciphertext_file = select_file()
+    while True:
+        p, q, d = private_key
 
-    # Add your decryption code here
+        # Check if the private key is valid
+        if isinstance(p, int) and isinstance(q, int) and isinstance(d, int) and p > 0 and q > 0 and d > 0:
+            break
+        else:
+            print("Invalid private key. Please select a valid private key file.")
+            print("Select a private key file:")
+            selected_private_key_file = select_file()
+            private_key = read_private_key(selected_private_key_file)
+
+    while True:
+        # Calculate the maximum valid ciphertext value
+        max_ciphertext = p * q - 1
+
+        # Check if the ciphertext is within the valid range
+        if 0 < ciphertext < max_ciphertext:
+            break
+        else:
+            print("Invalid ciphertext. Please select a valid ciphertext file.")
+            print("Select a ciphertext file:")
+            selected_ciphertext_file = select_file()
+            ciphertext = read_ciphertext(selected_ciphertext_file)
+
+    # Decryption code here
 
     return decrypted
 
 
-def read_public_key():
-    with open("publickey.txt", "r") as r:
-        contents = r.readline()
-        n, e = map(int, contents.strip('()\n').split(','))
-        return int(n), int(e)
 
 
 def read_private_key():
@@ -163,11 +231,11 @@ def select_file() -> str:
     return file_path
 
 
-def read_file(filename: str) -> str:
-    """Read the contents of a text file and return as a string."""
-    with open(filename, "r") as file:
-        contents = file.read()
-    return contents
+def read_public_key(selected_public_key_file: str):
+    with open(selected_public_key_file, "r") as r:
+        contents = r.readline()
+        n, e = map(int, contents.strip('()\n').split(','))
+        return int(n), int(e)    
 
 
 def write_public_key(public_key: Tuple[int, int]):
@@ -196,7 +264,7 @@ def main():
             generate_keys()
         elif choice == "2":
             print("Encryption option selected.")
-            rsa_encrypt(read_public_key(), 100)
+            rsa_encrypt()
         elif choice == "3":
             print("Decryption option selected.")
             rsa_decrypt(read_private_key(), 100)
