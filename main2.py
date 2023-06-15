@@ -9,13 +9,25 @@ from tkinter import filedialog
 
 def getprimes():
     while True:
-        # 1st precondition: p and q are prime between 100 and 200
-        p = sympy.randprime(1, 999999999999)
-        q = sympy.randprime(1, 999999999999)
-        # 2nd precondition: p != q
-        if (p == q):
-            q = sympy.randprime(1, 999999999999)
-        return p, q
+        # Prompt the user to enter the minimum and maximum values
+        min_value = int(input("Enter the minimum value (greater than 1): "))
+        max_value = int(input("Enter the maximum value: "))
+
+        # Validate the minimum value
+        if min_value <= 1:
+            print("Invalid minimum value. Please enter a value greater than 1.")
+            continue
+
+        # Generate prime numbers within the given range
+        p = sympy.randprime(min_value, max_value)
+        q = sympy.randprime(min_value, max_value)
+
+        # Ensure p and q are distinct
+        if p != q:
+            return p, q
+        else:
+            print("Generated identical primes. Please try again.")
+
 
 
 def extended_gcd(a, b):
