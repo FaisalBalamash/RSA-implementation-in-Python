@@ -14,12 +14,40 @@ def getprimes():
         return p, q
 
 
+def extended_gcd(a, b):
+    global x, y
+
+    # Base Case
+    if (a == 0):
+        x = 0
+        y = 1
+        return b
+
+    # To store results of recursive call
+    gcd = extended_gcd(b % a, a)
+    x1 = x
+    y1 = y
+
+    # Update x and y using results of recursive
+    # call
+    x = y1 - (b // a) * x1
+    y = x1
+
+    return gcd
+
+
 def modular_inverse(e, phi_n):
-    """this method is used to get d by getting d * e (mod phi_n) == 1 and return X"""
-    for X in range(1, phi_n):
-        if (((e % phi_n) * (X % phi_n)) % phi_n == 1):
-            return X
-    return -1
+    g = extended_gcd(e, phi_n)
+
+    #if gcd = 1 doesn't exist then we can't inverse it.
+    if (g != 1):
+        print("Inverse doesn't exist")
+        exit(1)
+
+    else:
+        # phi_n is added to handle negative x
+        res = (x % phi_n + phi_n) % phi_n
+        return res
 
 
 def rsa_generate_key(p: int, q: int):
