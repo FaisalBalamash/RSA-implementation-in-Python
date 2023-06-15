@@ -2,6 +2,8 @@ import math
 import random
 from typing import Tuple
 import sympy
+import tkinter as tk
+from tkinter import filedialog
 
 
 def getprimes():
@@ -62,7 +64,7 @@ def rsa_generate_key(p: int, q: int):
         - p and q are prime
         - p != q
     """
-    # Compute the product of p and q 
+    # Compute the product of p and q
     n = p * q
 
     # Choose e such that gcd(e, phi_n) == 1.
@@ -88,9 +90,15 @@ def rsa_encrypt(public_key: Tuple[int, int], plaintext: int) -> int:
         - public_key is a valid RSA public key (n, e)
         - 0 < plaintext < public_key[0]
     """
-    n, e = public_key
+    # Prompt the user to select a public key file
+    print("Select a public key file:")
+    selected_public_key_file = select_file()
+    
+    # Prompt the user to select a plaintext file
+    print("Select a plaintext file:")
+    selected_plaintext_file = select_file()
 
-    encrypted = (plaintext ** e) % n
+    # Add your encryption code here
 
     return encrypted
 
@@ -102,10 +110,15 @@ def rsa_decrypt(private_key: Tuple[int, int, int], ciphertext: int) -> int:
         - private_key is a valid RSA private key (p, q, d)
         - 0 < ciphertext < private_key[0] * private_key[1]
     """
-    p, q, d = private_key
-    n = p * q
+    # Prompt the user to select a private key file
+    print("Select a private key file:")
+    selected_private_key_file = select_file()
+    
+    # Prompt the user to select a ciphertext file
+    print("Select a ciphertext file:")
+    selected_ciphertext_file = select_file()
 
-    decrypted = (ciphertext ** d) % n
+    # Add your decryption code here
 
     return decrypted
 
@@ -124,26 +137,73 @@ def read_private_key():
         return int(p), int(q), int(d)
 
 
-if __name__ == "__main__":
-    print("RSA Implementation in Python")
-    print("Two random prime numbers are chosen")
-
-    print("Generating a key pair....")
+def generate_keys():
+    print("Generating a key pair....\n")
     p, q = getprimes()
 
-    print("Exporting Private Key to privatekey.txt")
-    with open("privatekey.txt", "a") as f:
-        f.write(f'{rsa_generate_key(p, q)[0]}\n')
+    private_key = rsa_generate_key(p, q)[0]
+    public_key = rsa_generate_key(p, q)[1]
 
-    print("Exporting Public Key to publickey.txt")
-    with open("publickey.txt", "a") as f:
-        f.write(f'{rsa_generate_key(p, q)[1]}\n')
+    # Write private key to a file
+    write_private_key(private_key)
 
-print("Key pair generated!")
+    print("Private key generated and saved to privatekey.txt\n")
 
-print("Encrypting process: ")
-ciphertext = rsa_encrypt(read_public_key(), 100)
-print(ciphertext)
+    # Write public key to a file
+    write_public_key(public_key)
 
-print("Decrypting process: ")
-print(rsa_decrypt(read_private_key(), ciphertext))
+    print("Public key generated and saved to publickey.txt\n.\n.\n.")
+
+
+def select_file() -> str:
+    """Prompt the user to select a file and return the selected file path."""
+    root = tk.Tk()
+    root.withdraw()
+    file_path = filedialog.askopenfilename()
+    return file_path
+
+
+def read_file(filename: str) -> str:
+    """Read the contents of a text file and return as a string."""
+    with open(filename, "r") as file:
+        contents = file.read()
+    return contents
+
+
+def write_public_key(public_key: Tuple[int, int]):
+    """Write the public key to a file."""
+    with open("publickey.txt", "w") as f:
+        f.write(str(public_key))
+
+
+def write_private_key(private_key: Tuple[int, int, int]):
+    """Write the private key to a file."""
+    with open("privatekey.txt", "w") as f:
+        f.write(str(private_key))
+
+
+def main():
+    print("Welcome to the RSA Algorithm program!")
+    while True:
+        print("Please select an option:")
+        print("1. Generate keys")
+        print("2. Encrypt a file")
+        print("3. Decrypt a file")
+        print("4. Quit")
+        choice = input("Enter your choice (1-4): ")
+
+        if choice == "1":
+            generate_keys()
+        elif choice == "2":
+            print("Encryption option selected.")
+            rsa_encrypt(read_public_key(), 100)
+        elif choice == "3":
+            print("Decryption option selected.")
+            rsa_decrypt(read_private_key(), 100)
+        elif choice == "4":
+            print("Thank you for using the encryption program. Goodbye!")
+            break
+
+
+if __name__ == "__main__":
+    main()
