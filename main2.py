@@ -165,16 +165,31 @@ def convert_to_decimal(text: str, n: int) -> List[int]:
 
 
 
+def read_ciphertext(file_path: str) -> List[int]:
+    """Read the ciphertext file and return the ciphertext as an integer list."""
+    ciphertext = []
+    
+    with open(file_path, 'r') as file:
+        ciphertext_str = file.read().strip()
+        
+        # Read the ciphertext in groups of four digits
+        for i in range(0, len(ciphertext_str), 4):
+            chunk = ciphertext_str[i:i+4]
+            ciphertext.append(int(chunk))
+    
+    return ciphertext
 
 
 ##################### Decryption ########################
-def rsa_decrypt(private_key: Tuple[int, int, int], ciphertext: int) -> int:
-    """Decrypt the given ciphertext using the recipient's private key.
+def rsa_decrypt():
+    """Decrypt the given ciphertext using the recipient's private key."""
+    print("Select private key file:")
+    selected_private_key_file = select_file()
+    private_key = read_private_key(selected_private_key_file)
 
-    Preconditions:
-        - private_key is a valid RSA private key (p, q, d)
-        - 0 < ciphertext < private_key[0] * private_key[1]
-    """
+    print("Select ciphertext to decrypt:")
+    selected_ciphertext_file = select_file()
+    
     while True:
         p, q, d = private_key
 
@@ -187,28 +202,18 @@ def rsa_decrypt(private_key: Tuple[int, int, int], ciphertext: int) -> int:
             selected_private_key_file = select_file()
             private_key = read_private_key(selected_private_key_file)
 
-    while True:
-        # Calculate the maximum valid ciphertext value
-        max_ciphertext = p * q - 1
+    #int list
+    ciphertext = read_ciphertext(selected_ciphertext_file)
+    print(ciphertext)
 
-        # Check if the ciphertext is within the valid range
-        if 0 < ciphertext < max_ciphertext:
-            break
-        else:
-            print("Invalid ciphertext. Please select a valid ciphertext file.")
-            print("Select a ciphertext file:")
-            selected_ciphertext_file = select_file()
-            ciphertext = read_ciphertext(selected_ciphertext_file)
-
-    # Decryption code here
-
-    return decrypted
+ 
+    
 
 
 
 
-def read_private_key():
-    with open("privatekey.txt", "r") as r:
+def read_private_key(selected_private_key_file: str):
+    with open(selected_private_key_file, "r") as r:
         contents = r.readline()
         p, q, d = map(int, contents.strip('()\n').split(','))
         return int(p), int(q), int(d)
@@ -276,7 +281,7 @@ def main():
             rsa_encrypt()
         elif choice == "3":
             print("Decryption option selected.")
-            rsa_decrypt(read_private_key(), 100)
+            rsa_decrypt()
         elif choice == "4":
             print("Goodbye!")
             break
