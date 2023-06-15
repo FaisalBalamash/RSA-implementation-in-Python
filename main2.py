@@ -6,95 +6,19 @@ import sympy
 import tkinter as tk
 from tkinter import filedialog
 
-def getprimes():
-    while True:
-        # Prompt the user to enter the minimum and maximum values
-        min_value = int(input("Enter the minimum value (greater than 1): "))
-        max_value = int(input("Enter the maximum value: "))
-
-        # Validate the minimum value
-        if min_value <= 1:
-            print("Invalid minimum value. Please enter a value greater than 1.")
-            continue
-
-        # Generate prime numbers within the given range
-        p = sympy.randprime(min_value, max_value)
-        q = sympy.randprime(min_value, max_value)
-
-        # Ensure p and q are distinct
-        if p != q:
-            return p, q
-        else:
-            print("Generated identical primes. Please try again.")
-
-
-
-def extended_gcd(a, b):
-    global x, y
-
-    # Base Case
-    if (a == 0):
-        x = 0
-        y = 1
-        return b
-
-    # To store results of recursive call
-    gcd = extended_gcd(b % a, a)
-    x1 = x
-    y1 = y
-
-    # Update x and y using results of recursive
-    # call
-    x = y1 - (b // a) * x1
-    y = x1
-
-    return gcd
-
-
-def modular_inverse(e, phi_n):
-    g = extended_gcd(e, phi_n)
-
-    # if gcd = 1 doesn't exist then we can't inverse it.
-    if (g != 1):
-        print("Inverse doesn't exist")
-        exit(1)
-
-    else:
-        # phi_n is added to handle negative x
-        res = (x % phi_n + phi_n) % phi_n
-        return res
-
-
-def rsa_generate_key(p: int, q: int):
-    """Return an RSA key pair generated using primes p and q.
-
-    The return value is a tuple containing two tuples:
-      1. The first tuple is the private key, containing (p, q, d).
-      2. The second tuple is the public key, containing (n, e).
+def encryption_equation(public_key: Tuple[int, int], plaintext: int) -> int:
+    """Encrypt the given plaintext using the recipient's public key.
 
     Preconditions:
-        - p and q are prime
-        - p != q
+        - public_key is a valid RSA public key (n, e)
+        - 0 < plaintext < public_key[0]
     """
-    # Compute the product of p and q
-    n = p * q
+    n, e = public_key
+    encrypted = (plaintext ** e) % n
 
-    # Choose e such that gcd(e, phi_n) == 1.
-    phi_n = (p - 1) * (q - 1)
+    return encrypted
 
-    # Since e is chosen randomly, we repeat the random choice
-    # until e is coprime to phi_n.
-    e = random.randint(2, phi_n - 1)
-    while math.gcd(e, phi_n) != 1:
-        e = random.randint(2, phi_n - 1)
-
-    # Choose d such that e * d % phi_n = 1.
-    # Notice that we're using our modular_inverse from our work in the last chapter!
-    d = modular_inverse(e, phi_n)
-
-    return ((p, q, d), (n, e))
-
-
+##################### Encryption ########################
 def rsa_encrypt():
     print("select public key file")
     selected_public_key_file = select_file()
@@ -103,95 +27,80 @@ def rsa_encrypt():
 
     print("select plaintext to encrypt")
     selected_plaintext_file = select_file()
-    plaintext = read_plaintext(selected_plaintext_file)
 
     while True:
-        # Check if the public key is valid
-        if isinstance(n, int) and isinstance(e, int) and n > 0 and e > 0:
-            break
-        else:
-            print("Invalid public key. Please select a valid public key file.")
-            print("Select a public key file:")
-            selected_public_key_file = select_file()
-            public_key = read_public_key(selected_public_key_file)
+        try:
+            # Check if the public key is valid
+            if isinstance(n, int) and isinstance(e, int) and n > 0 and e > 0:
+                break
+            else:
+                print("Invalid public key. Please select a valid public key file.")
+                print("Select a public key file:")
+                selected_public_key_file = select_file()
+                public_key = read_public_key(selected_public_key_file)
+                n, e = public_key
+        except Exception as e:
+            print("Error:", e)
+            print("Please try again with a valid public key file.")
 
-    # Convert the plaintext file to decimal ASCII values
-    decimal_values = convert_to_decimal(plaintext, n)
-    print(decimal_values)
+    try:
+        with open(selected_plaintext_file, "r") as f:
+            file_contents = f.read()
+        decimal_string = ''.join([str(ord(c)).zfill(4) for c in file_contents])
 
-    encrypted_values = []
+        encrypted_values = []
+        i = 0
+        while i < len(decimal_string):
+            # encryption
+            block = decimal_string[i:i+4]
+            encrypted_values.append(str(encryption_equation((n, e), int(block))).zfill(8))
+            i += 4
 
-    for value in decimal_values:
-        encrypted_value = (value ** e) % n
-        encrypted_values.append(encrypted_value)
-
-    #for testing
-    print(encrypted_values)
-
- 
-    # Save the encrypted values to the ciphertext file
-    with open('ciphertext.txt', 'w') as file:
-        file.write(''.join(map(str, encrypted_values)))
-
-def read_plaintext(file_path: str) -> str:
-    """Read the content of the plaintext file and return it as a string."""
-    with open(file_path, 'r') as file:
-        plaintext = file.read()
-    return plaintext
-
-def convert_to_decimal(text: str, n: int) -> List[int]:
-    """Convert the characters in the text to concatenated decimal ASCII values within the range (0, n)."""
-    decimal_values = []
-    length = len(text)
-
-    # Convert each letter to ASCII value and concatenate in pairs
-    for i in range(0, length, 2):
-        if i + 1 < length:
-            ascii_value_1 = ord(text[i])
-            ascii_value_2 = ord(text[i + 1])
-            concatenated_decimal = int(str(ascii_value_1).zfill(2) + str(ascii_value_2).zfill(2))
-            if 0 < concatenated_decimal < n:
-                decimal_values.append(concatenated_decimal)
-        else:
-            # Handle odd number of characters
-            ascii_value = ord(text[i])
-            concatenated_decimal = int(str(ascii_value).zfill(2) + '00')
-            if 0 < concatenated_decimal < n:
-                decimal_values.append(concatenated_decimal)
-
-    return decimal_values
-
-
-
-
-
-def read_ciphertext(file_path: str) -> List[int]:
-    """Read the ciphertext file and return the ciphertext as an integer list."""
-    ciphertext = []
-    
-    with open(file_path, 'r') as file:
-        ciphertext_str = file.read().strip()
-        
-        # Read the ciphertext in groups of four digits
-        for i in range(0, len(ciphertext_str), 4):
-            chunk = ciphertext_str[i:i+4]
-            ciphertext.append(int(chunk))
-    
-    return ciphertext
+        with open("ciphertext.txt", "w") as f:
+            f.write(' '.join(encrypted_values))
+    except Exception as e:
+        print("Error:", e)
+        print("Please try again with a valid plaintext file.")
 
 
 ##################### Decryption ########################
+def decryption_equation(private_key: Tuple[int, int, int],  ciphertext: int) -> int:
+    """Decrypt the given ciphertext using the recipient's private key.
+
+    Preconditions:
+        - private_key is a valid RSA private key (p, q, d)
+        - 0 < ciphertext < private_key[0] * private_key[1]
+    """
+    p, q, d = private_key
+    n = p * q
+
+    decrypted = (ciphertext ** d) % n
+    return decrypted
+
 def rsa_decrypt():
     """Decrypt the given ciphertext using the recipient's private key."""
     print("Select private key file:")
     selected_private_key_file = select_file()
     private_key = read_private_key(selected_private_key_file)
     p, q, d = private_key
+
     print("Select ciphertext to decrypt:")
     selected_ciphertext_file = select_file()
 
-    while True:
+    with open(selected_ciphertext_file) as f:
+      encrypted_values = f.read().split()
 
+    plaintext = ""
+    for number in encrypted_values:
+        #call the rsa decrypt method
+        decrypted_block = str(decryption_equation((p, q, d), int(number))).zfill(4)
+        for i in range(0, len(decrypted_block), 4):
+            plaintext += chr(int(decrypted_block[i:i+4]))
+
+    with open("plaintext.txt", "w") as file:
+        file.write(plaintext)
+
+    while True:
         # Check if the private key is valid
         if isinstance(p, int) and isinstance(q, int) and isinstance(d, int) and p > 0 and q > 0 and d > 0:
             break
@@ -200,44 +109,7 @@ def rsa_decrypt():
             print("Select a private key file:")
             selected_private_key_file = select_file()
             private_key = read_private_key(selected_private_key_file)
-
-    # Obtain n from publickey.txt
-    with open("publickey.txt", "r") as file:
-        contents = file.readline()
-        n, e = map(int, contents.strip('()\n').split(','))
-
-    # int list
-    ciphertext_values = read_ciphertext(selected_ciphertext_file)
-    print(ciphertext_values)
-
-    decrypted_values = []
-
-    # applying rsa decrypt equation
-    for value in ciphertext_values:
-        decrypted_value = (value ** d) % n
-        decrypted_values.append(decrypted_value)
-
-    convert_to_text(decrypted_values)
  
-
-def convert_to_text(decrypted_values):
-    text = ""
-
-    for value in decrypted_values:
-        # Convert the 4-digit value to a string
-        value_str = str(value)
-
-        # Divide the value into two numbers made of two digits
-        num1 = int(value_str[:2])
-        num2 = int(value_str[2:])
-
-        # Convert each pair of digits to ASCII characters and concatenate to the resulting text
-        letter1 = chr(num1)
-        letter2 = chr(num2)
-        text += letter1 + letter2
-
-    print(text)
-    write_plaintext_to_file(text)
 
 def write_plaintext_to_file(plaintext):
     with open("plaintext.txt", "w") as file:
@@ -249,25 +121,6 @@ def read_private_key(selected_private_key_file: str):
         contents = r.readline()
         p, q, d = map(int, contents.strip('()\n').split(','))
         return int(p), int(q), int(d)
-
-
-def generate_keys():
-    print("Generating a key pair....\n")
-    p, q = getprimes()
-
-    private_key = rsa_generate_key(p, q)[0]
-    public_key = rsa_generate_key(p, q)[1]
-
-    # Write private key to a file
-    write_private_key(private_key)
-
-    print("Private key generated and saved to privatekey.txt\n")
-
-    # Write public key to a file
-    write_public_key(public_key)
-
-    print("Public key generated and saved to publickey.txt\n.\n.\n.")
-
 
 def select_file() -> str:
     """Prompt the user to select a file and return the selected file path."""
@@ -283,18 +136,86 @@ def read_public_key(selected_public_key_file: str):
         n, e = map(int, contents.strip('()\n').split(','))
         return int(n), int(e)    
 
+        
+def modular_inverse(a: int, m: int) -> int:
+    """Return the modular inverse of a modulo m, if it exists.
 
-def write_public_key(public_key: Tuple[int, int]):
-    """Write the public key to a file."""
-    with open("publickey.txt", "w") as f:
-        f.write(str(public_key))
+    Preconditions:
+        - a and m are positive integers
+        - a and m are coprime
+    """
+    t, new_t, r, new_r = 0, 1, m, a
+
+    while new_r != 0:
+        quotient, remainder = divmod(r, new_r)
+        t, new_t = new_t, t - quotient * new_t
+        r, new_r = new_r, remainder
+
+    if r > 1:
+        raise ValueError("a is not invertible modulo m")
+    if t < 0:
+        t += m
+
+    return t
 
 
-def write_private_key(private_key: Tuple[int, int, int]):
-    """Write the private key to a file."""
-    with open("privatekey.txt", "w") as f:
-        f.write(str(private_key))
+def rsa_generate_key(p: int, q: int) -> (Tuple[Tuple[int, int, int], Tuple[int, int]]):
+    # Compute the product of p and q
+    n = p * q
 
+    # Choose e such that gcd(e, phi_n) == 1.
+    phi_n = (p - 1) * (q - 1)
+
+    # Since e is chosen randomly, we repeat the random choice
+    # until e is coprime to phi_n.
+    e = random.randint(2, phi_n - 1)
+    while math.gcd(e, phi_n) != 1:
+        e = random.randint(2, phi_n - 1)
+
+    # Choose d such that e * d % phi_n = 1.
+    d = modular_inverse(e, phi_n)
+
+    return ((p, q, d), (n, e))
+
+
+def isPrime(n):
+    """Check if a number is prime.
+
+    Preconditions:
+        - n is a positive integer
+    """
+    if n <= 1:
+        return False
+    if n <= 3:
+        return True
+    if n % 2 == 0 or n % 3 == 0:
+        return False
+
+    i = 5
+    while i * i <= n:
+        if n % i == 0 or n % (i + 2) == 0:
+            return False
+        i += 6
+
+    return True
+
+
+def generate_primes(min: int, max: int) -> int:
+    while True:
+        num = random.randint(min, max)
+        if isPrime(num):
+            return num
+        
+def generate_keys():
+  p = generate_primes(100, 200)
+  q = generate_primes(100, 200)
+
+  private_key, public_key = rsa_generate_key(p, q)
+
+  with open("publickey.txt", "w") as f:
+    f.write(f"({public_key[0]}, {public_key[1]})")
+  with open("privatekey.txt", "w") as f:
+    f.write(f"({private_key[0]}, {private_key[1]}, {private_key[2]})")
 
 def main():
     print("Welcome to the RSA Algorithm program!")
@@ -308,6 +229,8 @@ def main():
 
         if choice == "1":
             generate_keys()
+            print("Private key generated and saved to privatekey.txt\n")
+            print("Public key generated and saved to publickey.txt\n.\n.\n.")
         elif choice == "2":
             print("Encryption option selected.")
             rsa_encrypt()
