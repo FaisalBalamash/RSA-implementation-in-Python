@@ -126,7 +126,7 @@ def rsa_encrypt():
 
     # Save the encrypted values to the ciphertext file
     with open('ciphertext.txt', 'w') as file:
-        file.write(' '.join(map(str, encrypted_values)))
+        file.write(''.join(map(str, encrypted_values)))
 
     return encrypted_values
 
