@@ -105,8 +105,6 @@ def rsa_encrypt():
     selected_plaintext_file = select_file()
     plaintext = read_plaintext(selected_plaintext_file)
 
-
-
     while True:
         # Check if the public key is valid
         if isinstance(n, int) and isinstance(e, int) and n > 0 and e > 0:
@@ -119,23 +117,13 @@ def rsa_encrypt():
 
     # Convert the plaintext file to decimal ASCII values
     decimal_values = convert_to_decimal(plaintext, n)
+    print(decimal_values)
 
     # Encrypt the decimal values using RSA encryption
     encrypted_values = []
     num_values = len(decimal_values)
 
-    # Process chunks of four decimal values
-    for i in range(0, num_values - (num_values % 4), 4):
-        values_chunk = decimal_values[i:i+4]  # Get the next four decimal values
-        encrypted_chunk = [pow(value, e, n) for value in values_chunk]  # Encrypt the chunk
-        encrypted_values.extend(encrypted_chunk)  # Append the encrypted chunk to the result
-
-    # Process remaining decimal values if any
-    if num_values % 4 != 0:
-        remaining_chunk = decimal_values[num_values - (num_values % 4):]  # Get the remaining decimal values
-        encrypted_chunk = [pow(value, e, n) for value in remaining_chunk]  # Encrypt the chunk
-        encrypted_values.extend(encrypted_chunk)  # Append the encrypted chunk to the result
-
+ 
     # Save the encrypted values to the ciphertext file
     with open('ciphertext.txt', 'w') as file:
         file.write(''.join(map(str, encrypted_values)))
@@ -149,23 +137,29 @@ def read_plaintext(file_path: str) -> str:
     return plaintext
 
 def convert_to_decimal(text: str, n: int) -> List[int]:
-    """Convert the characters in the text to concatenated decimal ASCII values within range (0, n)."""
+    """Convert the characters in the text to concatenated decimal ASCII values within the range (0, n)."""
     decimal_values = []
     length = len(text)
 
-    # Convert every two letters to concatenated decimal ASCII values
+    # Convert each letter to ASCII value and concatenate in pairs
     for i in range(0, length, 2):
         if i + 1 < length:
-            concatenated_decimal = int(str(ord(text[i])) + str(ord(text[i + 1])))
+            ascii_value_1 = ord(text[i])
+            ascii_value_2 = ord(text[i + 1])
+            concatenated_decimal = int(str(ascii_value_1).zfill(2) + str(ascii_value_2).zfill(2))
             if 0 < concatenated_decimal < n:
                 decimal_values.append(concatenated_decimal)
         else:
             # Handle odd number of characters
-            decimal_value = ord(text[i])
-            if 0 < decimal_value < n:
-                decimal_values.append(decimal_value)
+            ascii_value = ord(text[i])
+            concatenated_decimal = int(str(ascii_value).zfill(2) + '00')
+            if 0 < concatenated_decimal < n:
+                decimal_values.append(concatenated_decimal)
 
     return decimal_values
+
+
+
 
 
 
