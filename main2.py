@@ -119,16 +119,19 @@ def rsa_encrypt():
     decimal_values = convert_to_decimal(plaintext, n)
     print(decimal_values)
 
-    # Encrypt the decimal values using RSA encryption
     encrypted_values = []
-    num_values = len(decimal_values)
+
+    for value in decimal_values:
+        encrypted_value = (value ** e) % n
+        encrypted_values.append(encrypted_value)
+
+    #for testing
+    print(encrypted_values)
 
  
     # Save the encrypted values to the ciphertext file
     with open('ciphertext.txt', 'w') as file:
         file.write(''.join(map(str, encrypted_values)))
-
-    return encrypted_values
 
 def read_plaintext(file_path: str) -> str:
     """Read the content of the plaintext file and return it as a string."""
@@ -275,7 +278,7 @@ def main():
             print("Decryption option selected.")
             rsa_decrypt(read_private_key(), 100)
         elif choice == "4":
-            print("Thank you for using the encryption program. Goodbye!")
+            print("Goodbye!")
             break
 
 
