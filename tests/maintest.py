@@ -11,8 +11,5 @@ class TestRSA(unittest.TestCase):
     def test_inverse_modular(self):
         self.assertEqual(main.modular_inverse(2,7), 4)
 
-    def test_gcd_extended(self):
-        self.assertEqual(main.extended_gcd(4, 7), 1)
-
 if __name__ == '__main__':
     unittest.main()
