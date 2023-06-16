@@ -20,13 +20,26 @@ def encryption_equation(public_key: Tuple[int, int], plaintext: int) -> int:
 
 ##################### Encryption ########################
 def rsa_encrypt():
-    print("select public key file")
-    selected_public_key_file = select_file()
-    public_key = read_public_key(selected_public_key_file)
-    n, e = public_key
+    while True:
+        try:
+            print("Select public key file")
+            selected_public_key_file = select_file()
+            public_key = read_public_key(selected_public_key_file)
+            n, e = public_key
+            break  # Break the loop if no exception occurs
+        except Exception as e:
+            print("An error occurred with Public Key path:")
+            print("Please try again.")
 
-    print("select plaintext to encrypt")
-    selected_plaintext_file = select_file()
+    while True:
+        try:
+            print("Select plaintext to encrypt")
+            selected_plaintext_file = select_file()
+            break  # Break the loop if no exception occurs
+        except Exception as e:
+            print("An error occurred with Plaintext path:")
+            print("Please try again.")
+
 
     while True:
         try:
@@ -40,7 +53,7 @@ def rsa_encrypt():
                 public_key = read_public_key(selected_public_key_file)
                 n, e = public_key
         except Exception as e:
-            print("Error:", e)
+            print("An error occurred.")
             print("Please try again with a valid public key file.")
 
     try:
@@ -59,7 +72,7 @@ def rsa_encrypt():
         with open("ciphertext.txt", "w") as f:
             f.write(' '.join(encrypted_values))
     except Exception as e:
-        print("Error:", e)
+        print("An error occurred.")
         print("Please try again with a valid plaintext file.")
 
 
@@ -79,13 +92,26 @@ def decryption_equation(private_key: Tuple[int, int, int],  ciphertext: int) -> 
 
 def rsa_decrypt():
     """Decrypt the given ciphertext using the recipient's private key."""
-    print("Select private key file:")
-    selected_private_key_file = select_file()
-    private_key = read_private_key(selected_private_key_file)
-    p, q, d = private_key
+    while True:
+        try:
+            print("Select private key file:")
+            selected_private_key_file = select_file()
+            private_key = read_private_key(selected_private_key_file)
+            p, q, d = private_key
+            break  # Break the loop if no exception occurs
+        except Exception as e:
+            print("An error occurred with Private key path:")
+            print("Please try again.")
 
-    print("Select ciphertext to decrypt:")
-    selected_ciphertext_file = select_file()
+    while True:
+        try:
+            print("Select ciphertext to decrypt:")
+            selected_ciphertext_file = select_file()
+            # Process the selected ciphertext file
+            break  # Break the loop if no exception occurs
+        except Exception as e:
+            print("An error occurred with Ciphertext path:")
+            print("Please try again.")
 
     with open(selected_ciphertext_file) as f:
       encrypted_values = f.read().split()
@@ -109,7 +135,7 @@ def rsa_decrypt():
             print("Select a private key file:")
             selected_private_key_file = select_file()
             private_key = read_private_key(selected_private_key_file)
- 
+
 
 def write_plaintext_to_file(plaintext):
     with open("plaintext.txt", "w") as file:
@@ -134,9 +160,9 @@ def read_public_key(selected_public_key_file: str):
     with open(selected_public_key_file, "r") as r:
         contents = r.readline()
         n, e = map(int, contents.strip('()\n').split(','))
-        return int(n), int(e)    
+        return int(n), int(e)
 
-        
+
 def modular_inverse(a: int, m: int) -> int:
     """Return the modular inverse of a modulo m, if it exists.
 
@@ -205,7 +231,7 @@ def generate_primes(min: int, max: int) -> int:
         num = random.randint(min, max)
         if isPrime(num):
             return num
-        
+
 def generate_keys():
   p = generate_primes(100, 200)
   q = generate_primes(100, 200)
