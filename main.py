@@ -260,9 +260,11 @@ def main():
             print("Public key generated and saved to publickey.txt\n.\n.\n.")
         elif choice == "2":
             print("Encryption option selected.")
+            print("A filechooser window will pop up to choose the files needed")
             rsa_encrypt()
         elif choice == "3":
             print("Decryption option selected.")
+            print("A filechooser window will pop up to choose the files needed")
             rsa_decrypt()
         elif choice == "4":
             print("Goodbye!")
