@@ -152,6 +152,7 @@ def select_file() -> str:
     """Prompt the user to select a file and return the selected file path."""
     root = tk.Tk()
     root.withdraw()
+    root.wm_attributes('-topmost', 1)
     file_path = filedialog.askopenfilename()
     return file_path
 
