@@ -22,7 +22,7 @@ def encryption_equation(public_key: Tuple[int, int], plaintext: int) -> int:
 def rsa_encrypt():
     while True:
         try:
-            print("-->> Please select the public key file by using the window selector that will appear.")            
+            print("-->> Please select the public key file by using the window selector that will appear.\n")            
             selected_public_key_file = select_file()
             public_key = read_public_key(selected_public_key_file)
             n, e = public_key
@@ -33,7 +33,7 @@ def rsa_encrypt():
 
     while True:
         try:
-            print("-->> Please select the Plaintext file that you want to encrypt using the window selector that will appear.")
+            print("-->> Please select the Plaintext file that you want to encrypt using the window selector that will appear.\n")
             selected_plaintext_file = select_file()
             break  # Break the loop if no exception occurs
         except Exception as e:
@@ -94,7 +94,7 @@ def rsa_decrypt():
     """Decrypt the given ciphertext using the recipient's private key."""
     while True:
         try:
-            print("-->> Please select the private key file by using the window selector that will appear.")            
+            print("-->> Please select the private key file by using the window selector that will appear.\n")            
             selected_private_key_file = select_file()
             private_key = read_private_key(selected_private_key_file)
             p, q, d = private_key
@@ -105,7 +105,7 @@ def rsa_decrypt():
 
     while True:
         try:
-            print("-->> Select the ciphertext.txt file using the window selector that will appear to decrypt it.")
+            print("-->> Select the ciphertext.txt file using the window selector that will appear to decrypt it.\n")
             print("-->> A plaintext.txt file will be created containing the decrypted text..")
             selected_ciphertext_file = select_file()
             # Process the selected ciphertext file
@@ -260,12 +260,12 @@ def main():
             print("\n-->> Private key generated and saved to privatekey.txt\n")
             print("-->> Public key generated and saved to publickey.txt\n.\n.\n.")
         elif choice == "2":
-            print("-->> Encryption option selected.")
-            print("-->> A filechooser window will pop up to choose the files needed\nPress Alt + Tab if it didn't appear as the topmost window.")
+            print("-->> Encryption option selected.\n")
+            print("-->> A filechooser window will pop up to choose the files needed\n-->> Press Alt + Tab if it didn't appear as the topmost window.")
             rsa_encrypt()
         elif choice == "3":
-            print("-->> Decryption option selected.")
-            print("-->> A filechooser window will pop up to choose the files needed\nPress Alt + Tab if it didn't appear as the topmost window.")
+            print("-->> Decryption option selected.\n")
+            print("-->> A filechooser window will pop up to choose the files needed\n-->> Press Alt + Tab if it didn't appear as the topmost window.")
             rsa_decrypt()
         elif choice == "4":
             print("##### Goodbye! #####")
