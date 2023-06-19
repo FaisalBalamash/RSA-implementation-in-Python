@@ -22,7 +22,7 @@ def encryption_equation(public_key: Tuple[int, int], plaintext: int) -> int:
 def rsa_encrypt():
     while True:
         try:
-            print("Please select the public key file by using the window selector that will appear.")            
+            print("-->> Please select the public key file by using the window selector that will appear.")            
             selected_public_key_file = select_file()
             public_key = read_public_key(selected_public_key_file)
             n, e = public_key
@@ -33,7 +33,7 @@ def rsa_encrypt():
 
     while True:
         try:
-            print("Please select the Plaintext file that you want to encrypt using the window selector that will appear.")
+            print("-->> Please select the Plaintext file that you want to encrypt using the window selector that will appear.")
             selected_plaintext_file = select_file()
             break  # Break the loop if no exception occurs
         except Exception as e:
@@ -53,8 +53,8 @@ def rsa_encrypt():
                 public_key = read_public_key(selected_public_key_file)
                 n, e = public_key
         except Exception as e:
-            print("An error occurred.")
-            print("Please try again with a valid public key file.")
+            print("-->> An error occurred.")
+            print("-->> Please try again with a valid public key file.")
 
     try:
         with open(selected_plaintext_file, "r") as f:
@@ -72,8 +72,8 @@ def rsa_encrypt():
         with open("ciphertext.txt", "w") as f:
             f.write(' '.join(encrypted_values))
     except Exception as e:
-        print("An error occurred.")
-        print("Please try again with a valid plaintext file.")
+        print("-->> An error occurred.")
+        print("-->> Please try again with a valid plaintext file.")
 
 
 ##################### Decryption ########################
@@ -94,25 +94,25 @@ def rsa_decrypt():
     """Decrypt the given ciphertext using the recipient's private key."""
     while True:
         try:
-            print("Please select the private key file by using the window selector that will appear.")            
+            print("-->> Please select the private key file by using the window selector that will appear.")            
             selected_private_key_file = select_file()
             private_key = read_private_key(selected_private_key_file)
             p, q, d = private_key
             break  # Break the loop if no exception occurs
         except Exception as e:
-            print("An error occurred with Private key path:")
-            print("Please try again.")
+            print("-->> An error occurred with Private key path:")
+            print("-->> Please try again.")
 
     while True:
         try:
-            print("Select the ciphertext.txt file using the window selector that will appear to decrypt it.")
-            print("A plaintext.txt file will be created containing the decrypted text.")
+            print("-->> Select the ciphertext.txt file using the window selector that will appear to decrypt it.")
+            print("-->> A plaintext.txt file will be created containing the decrypted text..")
             selected_ciphertext_file = select_file()
             # Process the selected ciphertext file
             break  # Break the loop if no exception occurs
         except Exception as e:
-            print("An error occurred with Ciphertext path:")
-            print("Please try again.")
+            print("-->> An error occurred with Ciphertext path:")
+            print("-->> Please try again.")
 
     with open(selected_ciphertext_file) as f:
       encrypted_values = f.read().split()
@@ -132,8 +132,8 @@ def rsa_decrypt():
         if isinstance(p, int) and isinstance(q, int) and isinstance(d, int) and p > 0 and q > 0 and d > 0:
             break
         else:
-            print("Invalid private key. Please select a valid private key file.")
-            print("Select a private key file:")
+            print("-->> Invalid private key. Please select a valid private key file.")
+            print("-->> Select a private key file:")
             selected_private_key_file = select_file()
             private_key = read_private_key(selected_private_key_file)
 
@@ -246,29 +246,29 @@ def generate_keys():
     f.write(f"({private_key[0]}, {private_key[1]}, {private_key[2]})")
 
 def main():
-    print("Welcome to the RSA Algorithm program!")
+    print("\n############ Welcome to the RSA Algorithm program! ############\n")
     while True:
-        print("Please select an option:")
+        print("\n-->> Please select an option:")
         print("1. Generate keys")
         print("2. Encrypt a file")
         print("3. Decrypt a file")
         print("4. Quit")
-        choice = input("Enter your choice (1-4): ")
+        choice = input("\n-->> Enter your choice (1-4): ")
 
         if choice == "1":
             generate_keys()
-            print("Private key generated and saved to privatekey.txt\n")
-            print("Public key generated and saved to publickey.txt\n.\n.\n.")
+            print("\n-->> Private key generated and saved to privatekey.txt\n")
+            print("-->> Public key generated and saved to publickey.txt\n.\n.\n.")
         elif choice == "2":
-            print("Encryption option selected.")
-            print("A filechooser window will pop up to choose the files needed\nPress Alt + Tab if it didn't appear as the topmost window.")
+            print("-->> Encryption option selected.")
+            print("-->> A filechooser window will pop up to choose the files needed\nPress Alt + Tab if it didn't appear as the topmost window.")
             rsa_encrypt()
         elif choice == "3":
-            print("Decryption option selected.")
-            print("A filechooser window will pop up to choose the files needed\nPress Alt + Tab if it didn't appear as the topmost window.")
+            print("-->> Decryption option selected.")
+            print("-->> A filechooser window will pop up to choose the files needed\nPress Alt + Tab if it didn't appear as the topmost window.")
             rsa_decrypt()
         elif choice == "4":
-            print("Goodbye!")
+            print("##### Goodbye! #####")
             break
 
 
